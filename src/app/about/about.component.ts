@@ -1,18 +1,18 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {
-    concat,
-    fromEvent,
-    interval,
-    noop,
-    observable,
-    Observable,
-    of,
-    timer,
-    merge,
-    Subject,
-    BehaviorSubject,
-    AsyncSubject,
-    ReplaySubject
+  concat,
+  fromEvent,
+  interval,
+  noop,
+  observable,
+  Observable,
+  of,
+  timer,
+  merge,
+  Subject,
+  BehaviorSubject,
+  AsyncSubject,
+  ReplaySubject, Subscription
 } from 'rxjs';
 import {delayWhen, filter, map, take, timeout} from 'rxjs/operators';
 import {createHttpObservable} from '../common/util';
@@ -24,22 +24,25 @@ import {createHttpObservable} from '../common/util';
     styleUrls: ['./about.component.css']
 })
 export class AboutComponent implements OnInit {
+  public sub: Subscription;
 
     ngOnInit() {
-      const interval$ = interval(1000); // its definition of stream of values as known as Observable
-
-      // we need to subscribe to make stream of values
-
-      interval$.subscribe(val => console.log('stream 1 =>  ' + val));
-      interval$.subscribe(val => console.log('stream 2 =>  ' + val));
-
-      // wait 3 seconds and then start to emit values each second
-      const intervalAfterSomeTime$ = timer(3000, 1000);
-      intervalAfterSomeTime$.subscribe(val => console.log('stream 1 after 3 secs ' + val));
-
-      // click streams
       const click$ = fromEvent(document, 'click');
-      click$.subscribe(evt => console.log(evt));
+      click$.subscribe(
+        evt => console.log(evt),
+        err => console.log(err),    // error logic here
+        () => console.log('completed')   // when stream ends, that logic here
+
+        // Observable always ends or gives an error.
+        // It never return to emit values again
+      );
+
+      // to unsubscribe Observable, we need to call unsubscribe method that can only be called
+      // from Subscription type
+      const interval$ = timer(3000, 1000);
+      this.sub = interval$.subscribe(val => console.log('stream 1 => ' + val));
+      setTimeout(() => this.sub.unsubscribe(), 5000);
+      // so starts after 3 seconds, ends after 5 seconds
     }
 }
 
