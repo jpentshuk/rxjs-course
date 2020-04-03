@@ -26,20 +26,7 @@ import {createHttpObservable} from "../common/util";
 export class AboutComponent implements OnInit {
 
   ngOnInit() {
-    const http$ = createHttpObservable('/api/courses');
 
-    const courses$ = http$
-      .pipe(     // chain operator
-        map(res => Object.values(res['payload']))   // we are mapping as object values from initial object, which has data on 'payload' prop
-      );
-
-    // so we are getting new Observable from initial http$
-
-    courses$.subscribe(
-      courses => console.log(courses),
-      noop,
-      ()=> console.log('completed')
-    );
   }
 }
 

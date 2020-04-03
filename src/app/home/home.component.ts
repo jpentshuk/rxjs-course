@@ -13,22 +13,34 @@ import {Store} from '../common/store.service';
 })
 export class HomeComponent implements OnInit {
 
-    beginnerCourses$: Observable<Course[]>;
+  public beginnersCourses: Course[];
+  public advancedCourses: Course[];
 
-    advancedCourses$: Observable<Course[]>;
-
-
-    constructor(private store:Store) {
-
-    }
 
     ngOnInit() {
 
-        const courses$ = this.store.courses$;
+      const http$ = createHttpObservable('/api/courses');
 
-        this.beginnerCourses$ = this.store.selectBeginnerCourses();
+      const courses$ = http$
+        .pipe(
+          map(res => Object.values(res['payload']))
+        );
 
-        this.advancedCourses$ = this.store.selectAdvancedCourses();
+
+      courses$.subscribe(
+        courses => {
+          this.beginnersCourses = courses.filter(course => {
+            return course.category === 'BEGINNER'
+          });
+          this.advancedCourses = courses.filter(course => {
+            return course.category === 'ADVANCED';
+          })
+        },
+        noop,
+        ()=> console.log('completed')
+      );
+
+      // note: that so-called imperative design, but we should avoid to use logic in subscribe methods
 
     }
 
