@@ -13,35 +13,32 @@ import {Store} from '../common/store.service';
 })
 export class HomeComponent implements OnInit {
 
-  public beginnersCourses: Course[];
-  public advancedCourses: Course[];
+  public beginnersCourses$: Observable<Course[]>;
+  public advancedCourses$:  Observable<Course[]>;
 
 
     ngOnInit() {
 
       const http$ = createHttpObservable('/api/courses');
 
-      const courses$ = http$
+      const courses$: Observable<Course[]> = http$
         .pipe(
           map(res => Object.values(res['payload']))
         );
 
+      this.beginnersCourses$ = courses$
+        .pipe(
+          map(courses => courses
+            .filter(course => course.category === 'BEGINNER'))
+        );
+      this.advancedCourses$ = courses$
+        .pipe(
+          map(courses => courses
+            .filter(course => course.category === 'ADVANCED'))
+        );
 
-      courses$.subscribe(
-        courses => {
-          this.beginnersCourses = courses.filter(course => {
-            return course.category === 'BEGINNER'
-          });
-          this.advancedCourses = courses.filter(course => {
-            return course.category === 'ADVANCED';
-          })
-        },
-        noop,
-        ()=> console.log('completed')
-      );
-
-      // note: that so-called imperative design, but we should avoid to use logic in subscribe methods
-
+      // now is reactive programming, but...
+      // we do 2 separate http requests at the moment
     }
 
 }
