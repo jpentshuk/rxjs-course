@@ -12,7 +12,7 @@ import {
   Subject,
   BehaviorSubject,
   AsyncSubject,
-  ReplaySubject, Subscription
+  ReplaySubject, Subscription, Observer
 } from 'rxjs';
 import {delayWhen, filter, map, take, timeout} from 'rxjs/operators';
 import {createHttpObservable} from '../common/util';
@@ -24,25 +24,27 @@ import {createHttpObservable} from '../common/util';
     styleUrls: ['./about.component.css']
 })
 export class AboutComponent implements OnInit {
-  public sub: Subscription;
 
     ngOnInit() {
-      const click$ = fromEvent(document, 'click');
-      click$.subscribe(
-        evt => console.log(evt),
-        err => console.log(err),    // error logic here
-        () => console.log('completed')   // when stream ends, that logic here
-
-        // Observable always ends or gives an error.
-        // It never return to emit values again
+      // making custom observable - whats happening under the hood of Observable
+      // thats output is Observable
+      const http$ = Observable.create(observer => {     // instead of create we could use 'new Observable'
+        fetch('/api/courses').then(response => {
+          return response.json();
+        }).then(body => {
+          observer.next(body);
+          observer.complete();
+        }).catch(err =>  {
+          observer.error(err);
+        });
+      });
+      http$.subscribe(
+        courses => console.log(courses), // its object, that contains payload
+        noop, // noop operation stands for () => {}
+        ()=> console.log('completed')
       );
 
-      // to unsubscribe Observable, we need to call unsubscribe method that can only be called
-      // from Subscription type
-      const interval$ = timer(3000, 1000);
-      this.sub = interval$.subscribe(val => console.log('stream 1 => ' + val));
-      setTimeout(() => this.sub.unsubscribe(), 5000);
-      // so starts after 3 seconds, ends after 5 seconds
+
     }
 }
 
