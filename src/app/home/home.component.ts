@@ -23,7 +23,10 @@ export class HomeComponent implements OnInit {
 
       const courses$: Observable<Course[]> = http$
         .pipe(
-          map(res => Object.values(res['payload']))
+          tap(()=> console.log('executed')), // tap is for side effects
+          map(res => Object.values(res['payload'])),
+          shareReplay() // that operator wont allow to execute same request multiple times, so its shared for multiple
+          // subscribers
         );
 
       this.beginnersCourses$ = courses$
@@ -36,9 +39,6 @@ export class HomeComponent implements OnInit {
           map(courses => courses
             .filter(course => course.category === 'ADVANCED'))
         );
-
-      // now is reactive programming, but...
-      // we do 2 separate http requests at the moment
     }
 
 }
