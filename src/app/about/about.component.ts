@@ -15,7 +15,7 @@ import {
   ReplaySubject, Subscription, Observer
 } from 'rxjs';
 import {delayWhen, filter, map, take, timeout} from 'rxjs/operators';
-import {createHttpObservable} from '../common/util';
+import {createHttpObservable} from "../common/util";
 
 
 @Component({
@@ -25,27 +25,22 @@ import {createHttpObservable} from '../common/util';
 })
 export class AboutComponent implements OnInit {
 
-    ngOnInit() {
-      // making custom observable - whats happening under the hood of Observable
-      // thats output is Observable
-      const http$ = Observable.create(observer => {     // instead of create we could use 'new Observable'
-        fetch('/api/courses').then(response => {
-          return response.json();
-        }).then(body => {
-          observer.next(body);
-          observer.complete();
-        }).catch(err =>  {
-          observer.error(err);
-        });
-      });
-      http$.subscribe(
-        courses => console.log(courses), // its object, that contains payload
-        noop, // noop operation stands for () => {}
-        ()=> console.log('completed')
+  ngOnInit() {
+    const http$ = createHttpObservable('/api/courses');
+
+    const courses$ = http$
+      .pipe(     // chain operator
+        map(res => Object.values(res['payload']))   // we are mapping as object values from initial object, which has data on 'payload' prop
       );
 
+    // so we are getting new Observable from initial http$
 
-    }
+    courses$.subscribe(
+      courses => console.log(courses),
+      noop,
+      ()=> console.log('completed')
+    );
+  }
 }
 
 

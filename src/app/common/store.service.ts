@@ -21,6 +21,7 @@ export class Store {
     init() {
 
         const http$ = createHttpObservable('/api/courses');
+        console.log('store init');
 
         http$
             .pipe(
